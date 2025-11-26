@@ -7,6 +7,9 @@
         </h2>
     </x-slot>
 
+    <x-breeze.page-header 
+    title="Selamat datang, {{ auth()->user()->full_name }}" />
+
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
@@ -114,8 +117,7 @@
                     <div class="p-6">
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="text-lg font-semibold text-gray-900">Karyawan Baru (&lt; 1 Tahun)</h3>
-                             
-                            <a href="#" class="text-sm text-indigo-600 hover:text-indigo-900 font-medium">Lihat semua →</a>
+                            <x-breeze.link-more href="#" text="Lihat semua " color="black" />
                         </div>
 
                         <x-ui.table :headers="['Nama','Email','Divisi','Bergabung']">
@@ -155,7 +157,7 @@
                 <div class="p-6">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-lg font-semibold text-gray-900">Pengajuan Cuti Terbaru</h3>
-                        <a href="#" class="text-sm text-indigo-600 hover:text-indigo-900 font-medium">Lihat semua →</a>
+                        <x-breeze.link-more href="#" text="Lihat semua " color="black" />
                     </div>
 
                     @if($recentLeaves->isEmpty())
@@ -197,7 +199,7 @@
                                             {{ $type['text'] }}
                                         </span>
                                     </td>
-
+ 
                                     {{-- Periode --}}
                                     <td class="px-6 py-4 text-sm text-gray-600">
                                         {{ formatDate($leave->start_date, 'd M') }} - {{ formatDate($leave->end_date, 'd M Y') }}

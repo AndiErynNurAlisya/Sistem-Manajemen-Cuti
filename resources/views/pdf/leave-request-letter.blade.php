@@ -157,14 +157,9 @@
         <h2>SURAT PERMOHONAN CUTI</h2>
     </div>
 
-    {{-- Nomor & Lampiran --}}
+    {{-- Nomor & Lampiran (Data dari Service) --}}
     <div class="document-meta">
         <table>
-            <tr>
-                <td>Nomor</td>
-                <td>:</td>
-                <td>{{ $requestId }}</td>
-            </tr>
             <tr>
                 <td>Lampiran</td>
                 <td>:</td>
@@ -193,7 +188,7 @@
         <p>Dengan hormat,</p>
     </div>
 
-    {{-- Identitas Pemohon --}}
+    {{-- Identitas Pemohon (Data dari Service) --}}
     <div class="content">
         <p>Yang bertanda tangan di bawah ini:</p>
         <div class="data-table">
@@ -212,7 +207,7 @@
         </div>
     </div>
 
-    {{-- Permohonan --}}
+    {{-- Permohonan (Data dari Service) --}}
     <div class="content">
         <p>Dengan ini mengajukan permohonan cuti dengan rincian sebagai berikut:</p>
         <div class="data-table">
@@ -246,7 +241,7 @@
         </div>
     </div>
 
-    {{-- Informasi Kontak --}}
+    {{-- Informasi Kontak (Data dari Service) --}}
     <div class="content">
         <p>Selama menjalankan cuti, saya dapat dihubungi melalui:</p>
         <div class="data-table">
@@ -270,7 +265,7 @@
         <p>Demikian surat permohonan ini saya buat dengan sebenarnya. Atas perhatian dan persetujuan Bapak/Ibu, saya ucapkan terima kasih.</p>
     </div>
 
-    {{-- Tanda Tangan --}}
+    {{-- Tanda Tangan (Data dari Service) --}}
     <div class="signature">
         <div class="signature-block">
             <p>{{ $city }}, {{ $submissionDate }}</p>
@@ -280,7 +275,7 @@
         </div>
     </div>
 
-    {{-- Footer --}}
+    {{-- Footer (Data dari Service) --}}
     <div class="footer">
         <p style="text-align: center;">
             <em>Dokumen ini dibuat secara elektronik pada {{ $timestamp }}</em>

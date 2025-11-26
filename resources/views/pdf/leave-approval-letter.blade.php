@@ -157,7 +157,7 @@
     </style>
 </head>
 <body>
-    {{-- Header Perusahaan --}}
+    {{-- Header Perusahaan (Data dari Service) --}}
     <div class="header">
         <h1>{{ $companyName }}</h1>
         <div class="company-info">
@@ -171,7 +171,7 @@
         <h2>SURAT IZIN CUTI</h2>
     </div>
 
-    {{-- Nomor & Lampiran --}}
+    {{-- Nomor & Lampiran (Data dari Service: generateLetterNumber) --}}
     <div class="document-meta">
         <table>
             <tr>
@@ -192,7 +192,7 @@
         </table>
     </div>
 
-    {{-- Penerima --}}
+    {{-- Penerima (Data dari Service) --}}
     <div class="recipient">
         <p>
             Kepada Yth.<br>
@@ -212,7 +212,7 @@
         <p>Berdasarkan surat permohonan cuti yang telah diajukan dan setelah melalui proses persetujuan dari Ketua Divisi dan Human Resource Department, dengan ini kami <strong>menyetujui</strong> pengajuan cuti Saudara/i dengan rincian sebagai berikut:</p>
     </div>
 
-    {{-- Data Cuti --}}
+    {{-- Data Cuti (Semua dari Service) --}}
     <div class="approval-box">
         <h3>RINCIAN CUTI YANG DISETUJUI</h3>
         <div class="data-table" style="margin-left: 0;">
@@ -256,7 +256,7 @@
         </div>
     </div>
 
-    {{-- Informasi Kontak Selama Cuti --}}
+    {{-- Informasi Kontak (Data dari Service) --}}
     <div class="content">
         <p>Selama menjalankan cuti, yang bersangkutan dapat dihubungi pada:</p>
         <div class="data-table">
@@ -280,7 +280,7 @@
         <p>Demikian surat izin cuti ini dibuat untuk dapat dipergunakan sebagaimana mestinya. Kami berharap yang bersangkutan dapat kembali bekerja dengan kondisi yang prima setelah masa cuti berakhir.</p>
     </div>
 
-    {{-- Tanda Tangan --}}
+    {{-- Tanda Tangan (Data dari Service: hrdName dari approver) --}}
     <div class="signature">
         <div class="signature-block">
             <p>{{ $city }}, {{ $approvalDate }}</p>

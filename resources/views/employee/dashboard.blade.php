@@ -1,13 +1,9 @@
 {{-- resources/views/employee/dashboard.blade.php --}}
 <x-app-layout>
-    <x-slot name="title">Dashboard - Employee</x-slot>
 
     {{-- Page Header --}}
-    <div class="mb-6">
-        <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p class="text-sm text-gray-600 mt-1">Selamat datang, {{ auth()->user()->full_name }}</p>
-    </div>
-
+    <x-breeze.page-header 
+        title="Selamat datang, {{ auth()->user()->full_name }}"/>
     {{-- Stats Cards --}}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         {{-- Annual Leave Quota --}}
@@ -100,10 +96,7 @@
         <div class="p-6 border-b border-gray-200">
             <div class="flex items-center justify-between">
                 <h2 class="text-lg font-semibold text-gray-900">Pengajuan Cuti Terakhir</h2>
-                <a href="{{ route('employee.leave-requests.index') }}" 
-                   class="text-sm text-indigo-600 hover:text-indigo-800 font-medium">
-                    Lihat Semua →
-                </a>
+                <x-breeze.link-more href="{{ route('employee.leave-requests.index') }}" color="black" />
             </div>
         </div>
 
@@ -118,56 +111,45 @@
                 </x-slot:icon>
             </x-ui.empty-state>
         @else
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead class="bg-gray-50 border-b border-gray-200">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jenis</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Periode</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Durasi</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Approval</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        @foreach($recentLeaves as $leave)
-                            <tr class="hover:bg-gray-50 transition">
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <x-ui.leave-type-badge :type="$leave->leave_type" />
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ $leave->start_date->format('d M Y') }} - {{ $leave->end_date->format('d M Y') }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                    {{ $leave->total_days }} hari
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <x-ui.leave-status-badge :status="$leave->status" />
-                                </td>
-                                <td class="px-6 py-4 text-sm">
-                                    @if($leave->approvals->isNotEmpty())
-                                        <div class="flex items-center space-x-1">
-                                            @foreach($leave->approvals as $approval)
-                                                @if($approval->status === 'approved')
-                                                    <span class="text-green-600" title="{{ $approval->approver->full_name }} ({{ ucfirst($approval->approver_role) }})">✓</span>
-                                                @elseif($approval->status === 'rejected')
-                                                    <span class="text-red-600" title="{{ $approval->approver->full_name }} ({{ ucfirst($approval->approver_role) }})">✗</span>
-                                                @endif
-                                            @endforeach
-                                        </div>
-                                    @else
-                                        <span class="text-gray-400 text-xs">Belum ada</span>
-                                    @endif
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <a href="{{ route('employee.leave-requests.show', $leave) }}" 
-                                       class="text-indigo-600 hover:text-indigo-900">
-                                        Detail
-                                    </a>
-                                </td>
-                            </tr>
-                        @endforeach
+            <x-ui.table :headers="['Jenis','Periode','Durasi Cuti','Status','Aksi']">
+
+                @foreach($recentLeaves as $leave)
+                    <tr class="hover:bg-gray-50 transition">
+
+                        {{-- Jenis --}}
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <x-ui.leave-type-badge :type="$leave->leave_type" />
+                        </td>
+
+                        {{-- Periode --}}
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {{ $leave->start_date->format('d M Y') }} - {{ $leave->end_date->format('d M Y') }}
+                        </td>
+
+                        {{-- Durasi --}}
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                            {{ $leave->total_days }} hari
+                        </td>
+
+                        {{-- Status --}}
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <x-ui.leave-status-badge :status="$leave->status" />
+                        </td>
+                        <!--buatkan komponen-->
+
+                        {{-- Aksi --}}
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <a href="{{ route('employee.leave-requests.show', $leave) }}"
+                            class="text-indigo-600 hover:text-indigo-900">
+                                Detail
+                            </a>
+                        </td>
+
+                    </tr>
+                @endforeach
+
+            </x-ui.table>
+
                     </tbody>
                 </table>
             </div>
