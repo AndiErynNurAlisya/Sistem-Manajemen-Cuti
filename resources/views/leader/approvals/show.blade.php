@@ -1,5 +1,3 @@
-
-
 {{-- resources/views/leader/approvals/show.blade.php --}}
 <x-app-layout>
     <x-slot name="title">Review Pengajuan Cuti</x-slot>
@@ -90,7 +88,9 @@
                                 <dt class="text-sm font-medium text-gray-500 mb-2">Tanggal Selesai</dt>
                                 <dd class="text-sm font-semibold text-gray-900">{{ $leaveRequest->end_date->format('d F Y') }}</dd>
                             </div>
-                            <div class="col-span-2">
+                            
+                            {{-- PERBAIKAN: Durasi dan Alasan Cuti sejajar --}}
+                            <div>
                                 <dt class="text-sm font-medium text-gray-500 mb-2">Durasi</dt>
                                 <dd>
                                     <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
@@ -98,11 +98,10 @@
                                     </span>
                                 </dd>
                             </div>
-                        </div>
-
-                        <div>
-                            <dt class="text-sm font-medium text-gray-500 mb-2">Alasan Cuti</dt>
-                            <dd class="text-sm text-gray-900 bg-gray-50 rounded-lg p-4">{{ $leaveRequest->reason }}</dd>
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500 mb-2">Alasan Cuti</dt>
+                                <dd class="text-sm text-gray-900 bg-gray-50 rounded-lg p-3">{{ $leaveRequest->reason }}</dd>
+                            </div>
                         </div>
 
                         <div class="grid grid-cols-2 gap-6">
@@ -116,14 +115,14 @@
                             </div>
                         </div>
 
-                        {{-- Medical Certificate --}}
+                        {{-- Surat Dokter (Cuti Sakit) --}}
                         @if($leaveRequest->leave_type->value === 'sick' && $leaveRequest->medical_certificate)
                             <div>
                                 <dt class="text-sm font-medium text-gray-500 mb-2">Surat Dokter</dt>
                                 <dd>
                                     <a href="{{ $leaveRequest->medical_certificate_url }}" 
                                        target="_blank"
-                                       class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                                       class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
                                         <svg class="w-5 h-5 mr-2 text-red-500" fill="currentColor" viewBox="0 0 20 20">
                                             <path fill-rule="evenodd" d="M8 4a3 3 0 00-3 3v4a5 5 0 0010 0V7a1 1 0 112 0v4a7 7 0 11-14 0V7a5 5 0 0110 0v4a3 3 0 11-6 0V7a1 1 0 012 0v4a1 1 0 102 0V7a3 3 0 00-3-3z" clip-rule="evenodd"/>
                                         </svg>
@@ -132,19 +131,33 @@
                                 </dd>
                             </div>
                         @endif
+
+                        {{-- Surat Permohonan Cuti (Cuti Tahunan) --}}
+                        @if($leaveRequest->leave_type->value === 'annual' && $leaveRequest->request_letter_pdf)
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500 mb-2">Surat Permohonan Cuti</dt>
+                                <dd>
+                                    <a href="{{ $leaveRequest->request_letter_url }}" 
+                                       target="_blank"
+                                       class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                                        <svg class="w-5 h-5 mr-2 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/>
+                                        </svg>
+                                        Lihat Surat Permohonan Cuti
+                                    </a>
+                                </dd>
+                            </div>
+                        @endif
                     </div>
                 </div>
 
-{{-- Approval Form --}}
+                {{-- Approval Form --}}
                 <div class="bg-white rounded-lg shadow-sm overflow-hidden">
                     <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
                         <h2 class="text-lg font-semibold text-gray-900">Keputusan Approval</h2>
                     </div>
 
                     <div class="p-6">
-
-                        {{-- PERBAIKAN: form action dikosongkan dulu agar bisa diisi secara dinamis --}}
-                       {{-- Sebelumnya form action kosong tetapi tidak di-set lewat JS sehingga gagal submit --}}
                         <form id="approvalForm" method="POST" action="">
                             @csrf
                             
@@ -176,17 +189,15 @@
                                     Kembali
                                 </a>
 
-                                {{-- PERBAIKAN: tombol reject hanya mengganti state, submit dilakukan di tombol konfirmasi --}}
                                 <button type="button"
                                         @click="action = 'reject'"
-                                        class="px-6 py-2.5 border border-red-300 rounded-lg text-sm font-medium text-red-700 bg-red-50">
+                                        class="px-6 py-2.5 border border-red-300 rounded-lg text-sm font-medium text-red-700 bg-red-50 hover:bg-red-100 transition-colors">
                                     Tolak
                                 </button>
 
-                                {{-- PERBAIKAN: tombol approve juga hanya mengganti state --}}
                                 <button type="button"
                                         @click="action = 'approve'"
-                                        class="px-6 py-2.5 border border-green-300 rounded-lg text-sm font-medium text-green-700 bg-green-50">
+                                        class="px-6 py-2.5 border border-green-300 rounded-lg text-sm font-medium text-green-700 bg-green-50 hover:bg-green-100 transition-colors">
                                     Setujui
                                 </button>
                             </div>
@@ -198,7 +209,6 @@
                                  :class="action === 'approve' ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'">
 
                                 <div class="flex items-start">
-
                                     <div class="flex-shrink-0">
                                         <svg x-show="action === 'approve'" class="h-5 w-5 text-green-400" fill="currentColor">
                                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
@@ -216,28 +226,23 @@
                                         </p>
                                     </div>
 
-                                    {{-- PERBAIKAN TERPENTING: dynamic route form action --}}
-                                    {{-- Di sinilah error kamu sebelumnya: data tidak terkirim karena action tidak berubah --}}
                                     <button type="button"
                                         @click="
                                             const form = document.getElementById('approvalForm');
-
-                                            // PERBAIKAN: form.action di-set secara dinamis
                                             form.action = (action === 'approve') 
                                                 ? '{{ route('leader.approvals.approve', $leaveRequest) }}'
                                                 : '{{ route('leader.approvals.reject', $leaveRequest) }}';
-
                                             isSubmitting = true;
                                             form.submit();
                                         "
-                                        class="ml-4 inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium text-white"
-                                        :class="action === 'approve' ? 'bg-green-600' : 'bg-red-600'">
+                                        :disabled="isSubmitting"
+                                        class="ml-4 inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                        :class="action === 'approve' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'">
                                         <span x-show="!isSubmitting">Konfirmasi</span>
                                         <span x-show="isSubmitting">Memproses...</span>
                                     </button>
                                 </div>
                             </div>
-
                         </form>
                     </div>
                 </div>
@@ -285,30 +290,4 @@
             </div>
         </div>
     </div>
-
-    @push('scripts')
-    <script>
-        // Fix: submitForm dipanggil dari Alpine.js context
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('approvalForm', () => ({
-                action: '',
-                notes: '',
-                isSubmitting: false,
-                
-                submitForm() {
-                    const form = document.getElementById('approvalForm');
-                    
-                    if (this.action === 'approve') {
-                        form.action = "{{ route('leader.approvals.approve', $leaveRequest) }}";
-                    } else if (this.action === 'reject') {
-                        form.action = "{{ route('leader.approvals.reject', $leaveRequest) }}";
-                    }
-                    
-                    this.isSubmitting = true;
-                    form.submit();
-                }
-            }))
-        })
-    </script>
-    @endpush
 </x-app-layout>
