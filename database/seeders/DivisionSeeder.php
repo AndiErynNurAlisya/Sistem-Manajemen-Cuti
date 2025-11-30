@@ -14,19 +14,14 @@ class DivisionSeeder extends Seeder
     {
         $divisions = [
             [
-                'name' => 'Tour Operations',
-                'description' => 'Tim operasional perjalanan ',
-                'established_date' => '2020-01-15',
+                'name' => 'Barista',
+                'description' => 'Tim penyedia dan peracik minuman kopi serta pelayanan cafè.',
+                'established_date' => '2021-01-10',
             ],
             [
-                'name' => 'Marketing & Sales',
-                'description' => 'Tim pemasaran dan penjualan',
-                'established_date' => '2020-02-01',
-            ],
-            [
-                'name' => 'Finance & Administration',
-                'description' => 'Tim keuangan dan administrasi perusahaan',
-                'established_date' => '2020-01-10',
+                'name' => 'Kitchen',
+                'description' => 'Tim pengolahan makanan dan produksi menu utama cafè.',
+                'established_date' => '2021-02-01',
             ],
         ];
 

@@ -15,13 +15,7 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
-    'company' => [
-        'name' => env('COMPANY_NAME', 'PT Maju Bersama'),
-        'address' => env('COMPANY_ADDRESS', 'Jl. Sudirman No. 123, Jakarta'),
-        'phone' => env('COMPANY_PHONE', '(021) 12345678'),
-        'email' => env('COMPANY_EMAIL', 'info@majubersama.com'),
-        'city' => env('COMPANY_CITY', 'Jakarta'),
-    ],
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment
@@ -72,7 +66,7 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    'timezone' => 'Asia/Makassar',
 
     /*
     |--------------------------------------------------------------------------

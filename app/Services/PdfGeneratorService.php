@@ -9,12 +9,7 @@ use Illuminate\Support\Facades\Log;
 
 class PdfGeneratorService
 {
-    /**
-     * Generate surat permohonan cuti (dari karyawan)
-     * 
-     * @param LeaveRequest $leaveRequest
-     * @return string Path to PDF file
-     */
+
     public function generateRequestLetter(LeaveRequest $leaveRequest): string
     {
         $data = $this->prepareRequestLetterData($leaveRequest);
@@ -38,12 +33,7 @@ class PdfGeneratorService
         return $filePath;
     }
     
-    /**
-     * Generate surat izin cuti (dari HRD setelah approved)
-     * 
-     * @param LeaveRequest $leaveRequest
-     * @return string Path to PDF file
-     */
+
     public function generateApprovalLetter(LeaveRequest $leaveRequest): string
     {
         $data = $this->prepareApprovalLetterData($leaveRequest);
@@ -67,12 +57,7 @@ class PdfGeneratorService
         return $filePath;
     }
     
-    /**
-     * Prepare data untuk surat permohonan
-     * 
-     * @param LeaveRequest $leaveRequest
-     * @return array
-     */
+
     protected function prepareRequestLetterData(LeaveRequest $leaveRequest): array
     {
         return [
@@ -86,21 +71,16 @@ class PdfGeneratorService
             'reason' => $leaveRequest->reason,
             'address' => $leaveRequest->address_during_leave,
             'emergencyContact' => $leaveRequest->emergency_contact,
-            'city' => config('app.company.city', 'Jakarta'),
+            'city' => config('app.company.city', 'Bali'),
             'submissionDate' => $this->formatDate($leaveRequest->request_date),
             'timestamp' => now()->format('d M Y H:i:s'),
         ];
     }
     
-    /**
-     * Prepare data untuk surat izin (approval)
-     * 
-     * @param LeaveRequest $leaveRequest
-     * @return array
-     */
+
    protected function prepareApprovalLetterData(LeaveRequest $leaveRequest): array
 {
-    // Get HRD approval
+
     $hrdApproval = $leaveRequest->approvals()
         ->where('approver_role', 'hrd')
         ->where('status', 'approved')
@@ -118,22 +98,16 @@ class PdfGeneratorService
         'address' => $leaveRequest->address_during_leave,
         'emergencyContact' => $leaveRequest->emergency_contact,
         'hrdName' => $hrdApproval?->approver->full_name ?? 'HRD Manager',
-        'city' => config('app.company.city', 'Jakarta'),
+        'city' => config('app.company.city', 'Bali'),
         'approvalDate' => $this->formatDate($leaveRequest->approved_at ?? now()),
-        'companyName' => config('app.company.name', 'PT Maju Bersama'),
-        'companyAddress' => config('app.company.address', 'Jakarta'),
-        'companyPhone' => config('app.company.phone', '(021) 12345678'),
-        'companyEmail' => config('app.company.email', 'info@company.com'),
+        'companyName' => config('app.company.name', 'Cafe Kita'),
+        'companyAddress' => config('app.company.address', 'Bali, Indonesia'),
+        'companyPhone' => config('app.company.phone', '(062) 12345678'),
+        'companyEmail' => config('app.company.email', 'cafekita@ngafe.com'),
     ];
 }
     
-    /**
-     * Generate nomor surat resmi
-     * Format: 001/CUTI/HRD/XI/2025
-     * 
-     * @param LeaveRequest $leaveRequest
-     * @return string
-     */
+
     protected function generateLetterNumber(LeaveRequest $leaveRequest): string
     {
         $sequence = LeaveRequest::where('status', 'approved')
@@ -150,13 +124,7 @@ class PdfGeneratorService
             now()->year
         );
     }
-    
-    /**
-     * Generate filename untuk surat permohonan
-     * 
-     * @param LeaveRequest $leaveRequest
-     * @return string
-     */
+
     protected function generateRequestFileName(LeaveRequest $leaveRequest): string
     {
         $userName = str_replace(' ', '_', strtolower($leaveRequest->user->full_name));
@@ -165,12 +133,6 @@ class PdfGeneratorService
         return "surat_permohonan_{$userName}_{$timestamp}.pdf";
     }
     
-    /**
-     * Generate filename untuk surat izin
-     * 
-     * @param LeaveRequest $leaveRequest
-     * @return string
-     */
     protected function generateApprovalFileName(LeaveRequest $leaveRequest): string
     {
         $userName = str_replace(' ', '_', strtolower($leaveRequest->user->full_name));
@@ -179,12 +141,7 @@ class PdfGeneratorService
         return "surat_izin_{$userName}_{$timestamp}.pdf";
     }
     
-    /**
-     * Format tanggal ke Bahasa Indonesia
-     * 
-     * @param mixed $date
-     * @return string
-     */
+
     protected function formatDate($date): string
     {
         $months = [
@@ -197,12 +154,7 @@ class PdfGeneratorService
         return $date->day . ' ' . $months[$date->month] . ' ' . $date->year;
     }
     
-    /**
-     * Konversi bulan ke angka romawi
-     * 
-     * @param int $month
-     * @return string
-     */
+
     protected function getMonthRoman(int $month): string
     {
         $romans = [

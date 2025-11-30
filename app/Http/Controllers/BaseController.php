@@ -12,9 +12,6 @@ abstract class BaseController extends Controller
 {
     use AuthorizesRequests, ValidatesRequests;
 
-    /**
-     * Return success response dengan redirect
-     */
     protected function success(string $message, $route = null, $data = null)
     {
         if ($route) {
@@ -24,9 +21,6 @@ abstract class BaseController extends Controller
         return back()->with('success', $message)->with('data', $data);
     }
 
-    /**
-     * Return error response
-     */
     protected function error(string $message, $route = null)
     {
         if ($route) {
@@ -36,10 +30,6 @@ abstract class BaseController extends Controller
         return back()->with('error', $message)->withInput();
     }
 
-    /**
-     * Execute database transaction dengan error handling
-     * Usage: return $this->transaction(function() { ... }, 'Success!', 'Failed!');
-     */
     protected function transaction(callable $callback, string $successMessage = 'Operasi berhasil', string $errorMessage = 'Operasi gagal')
     {
         DB::beginTransaction();
@@ -60,25 +50,16 @@ abstract class BaseController extends Controller
         }
     }
 
-    /**
-     * Get authenticated user
-     */
     protected function user()
     {
         return auth()->user();
     }
 
-    /**
-     * Check if user has role
-     */
     protected function hasRole(string $role): bool
     {
         return $this->user()->role->value === $role;
     }
 
-    /**
-     * Validate ownership (untuk resource yang punya user_id)
-     */
     protected function validateOwnership($resource, $userId = null)
     {
         $userId = $userId ?? $this->user()->id;
@@ -88,10 +69,6 @@ abstract class BaseController extends Controller
         }
     }
 
-    /**
-     * Handle file upload
-     * Usage: $path = $this->uploadFile($request->file('photo'), 'profile_photos');
-     */
     protected function uploadFile($file, string $folder = 'uploads', string $disk = 'public'): ?string
     {
         if (!$file) {
@@ -110,9 +87,6 @@ abstract class BaseController extends Controller
         }
     }
 
-    /**
-     * Delete file from storage
-     */
     protected function deleteFile(?string $path, string $disk = 'public'): bool
     {
         if (!$path) {
@@ -127,9 +101,6 @@ abstract class BaseController extends Controller
         }
     }
 
-    /**
-     * Paginate with custom per page
-     */
     protected function paginate($query, $perPage = 10)
     {
         $perPage = request('per_page', $perPage);

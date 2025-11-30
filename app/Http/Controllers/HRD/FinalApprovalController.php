@@ -27,24 +27,21 @@ class FinalApprovalController extends BaseController
      */
     public function index(Request $request)
     {
-        // Get pengajuan yang butuh final approval HRD
+        // ambil pengajuan yang butuh final approval HRD
         // Status: 'pending' (dari leader) atau 'approved_by_leader' (dari employee)
         $query = LeaveRequest::whereIn('status', ['pending', 'approved_by_leader'])
             ->with(['user', 'user.division', 'approvals.approver']);
         
-        // Filter by leave type
         if ($request->filled('leave_type')) {
             $query->where('leave_type', $request->leave_type);
         }
         
-        // Filter by division
         if ($request->filled('division_id')) {
             $query->whereHas('user', function($q) use ($request) {
                 $q->where('division_id', $request->division_id);
             });
         }
         
-        // Search by employee name
         if ($request->filled('search')) {
             $search = $request->search;
             $query->whereHas('user', function($q) use ($search) {
@@ -53,12 +50,10 @@ class FinalApprovalController extends BaseController
             });
         }
         
-        // Sort
         $query->latest('created_at');
         
         $pendingApprovals = $this->paginate($query);
         
-        // Get divisions for filter
         $divisions = \App\Models\Division::all();
         
         return view('hrd.final-approvals.index', compact('pendingApprovals', 'divisions'));
@@ -71,7 +66,7 @@ class FinalApprovalController extends BaseController
     {
         // Validasi: status harus pending atau approved_by_leader
         if (!in_array($leaveRequest->status->value, ['pending', 'approved_by_leader'])) {
-            return $this->error('Pengajuan ini sudah diproses sebelumnya.', 'hrd.final-approvals.index');
+            return $this->success('Pengajuan ini sudah berhasil disetujui.', 'hrd.final-approvals.index');
         }
         
         $leaveRequest->load([
@@ -92,17 +87,23 @@ class FinalApprovalController extends BaseController
      */
     public function approve(ApprovalRequest $request, LeaveRequest $leaveRequest)
     {
+            if (!$leaveRequest->user->division_id) {
+                return $this->error(
+                    'Employee ini belum terdaftar di divisi manapun. Harap atur divisi employee terlebih dahulu sebelum meng-approve cuti.',
+                    'hrd.final-approvals.show',
+                    ['leaveRequest' => $leaveRequest->id]
+                );
+            }
+            
         return $this->transaction(function() use ($request, $leaveRequest) {
             $user = $this->user();
             
-            // Final approve
             $this->approvalService->hrdApprove(
                 $leaveRequest,
                 $user,
                 $request->notes
             );
             
-            // Generate surat izin cuti (approval letter)
             $approvalLetterPath = $this->pdfService->generateApprovalLetter($leaveRequest);
             $leaveRequest->update(['approval_letter_pdf' => $approvalLetterPath]);
             
@@ -153,7 +154,6 @@ class FinalApprovalController extends BaseController
                 $request->notes
             );
             
-            // Generate PDF untuk yang berhasil
             foreach ($results['success'] as $id) {
                 $leaveRequest = LeaveRequest::find($id);
                 if ($leaveRequest) {
@@ -167,4 +167,32 @@ class FinalApprovalController extends BaseController
         count($request->leave_request_ids) . ' pengajuan berhasil diproses!',
         'Gagal memproses batch approval');
     }
+
+    /**
+ * Batch reject multiple requests
+ */
+public function batchReject(Request $request)
+{
+    $request->validate([
+        'leave_request_ids' => ['required', 'array'],
+        'leave_request_ids.*' => ['exists:leave_requests,id'],
+        'notes' => ['required', 'string', 'max:500']
+    ]);
+
+    return $this->transaction(function() use ($request) {
+        $user = $this->user();
+
+        $results = $this->approvalService->batchReject(
+            $request->leave_request_ids,
+            $user,
+            $request->notes
+        );
+
+        return $results;
+
+    },
+    count($request->leave_request_ids) . ' pengajuan ditolak!',
+    'Gagal memproses batch rejection');
+}
+
 }

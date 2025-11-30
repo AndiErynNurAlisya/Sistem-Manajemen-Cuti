@@ -8,13 +8,17 @@
 ])
 
 @php
-    $colors = [
-        'indigo' => 'border-indigo-200 hover:bg-indigo-50 group-hover:bg-indigo-200 bg-indigo-100 text-indigo-600',
-        'gray' => 'border-gray-200 hover:bg-gray-50 group-hover:bg-gray-200 bg-gray-100 text-gray-600',
-        'yellow' => 'border-yellow-200 hover:bg-yellow-50 group-hover:bg-yellow-200 bg-yellow-100 text-yellow-600',
-        'green' => 'border-green-200 hover:bg-green-50 group-hover:bg-green-200 bg-green-100 text-green-600',
-        'red' => 'border-red-200 hover:bg-red-50 group-hover:bg-red-200 bg-red-100 text-red-600',
-    ];
+$colors = [
+    'indigo' => 'border-indigo-200 hover:bg-indigo-50 group-hover:bg-indigo-200 bg-indigo-100 text-indigo-600',
+    'gray' => 'border-gray-400 hover:bg-gray-50 group-hover:bg-gray-200 bg-gray-100 text-gray-600',
+    'yellow' => 'border-yellow-200 hover:bg-yellow-50 group-hover:bg-yellow-200 bg-yellow-100 text-yellow-600',
+    'green' => 'border-green-200 hover:bg-green-50 group-hover:bg-green-200 bg-green-100 text-green-600',
+    'red' => 'border-red-200 hover:bg-red-50 group-hover:bg-red-200 bg-red-100 text-red-600',
+    'army' => 'border-[#334124] hover:bg-[#334124]/10 group-hover:bg-[#334124]/40 bg-[#334124]/20 text-[#334124]',
+    'creamarmy' => 'border-[#b5b89b] hover:bg-[#b5b89b]/10 group-hover:bg-[#b5b89b]/40 bg-[#b5b89b]/20 text-[#566534]',
+    'dashboard' => 'border-[#566534] hover:bg-[#566534]/10 group-hover:bg-[#566534]/40 bg-[#566534]/20 text-[#566534]',
+];
+
     
     $colorClass = explode(' ', $colors[$color] ?? $colors['indigo']);
 @endphp

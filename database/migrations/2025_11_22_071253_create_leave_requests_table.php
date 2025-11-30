@@ -50,7 +50,6 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
             
-            // Indexes untuk performance
             $table->index('user_id');
             $table->index('status');
             $table->index('leave_type');

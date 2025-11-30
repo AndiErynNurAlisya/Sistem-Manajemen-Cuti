@@ -1,22 +1,9 @@
 <?php
 
-// app/Helpers/helpers.php
+use Carbon\Carbon;
 
-if (!function_exists('isActiveRoute')) {
-    /**
-     * Check if current route matches pattern
-     */
-    function isActiveRoute($pattern, $output = 'bg-indigo-50 text-indigo-600')
-    {
-        $currentRoute = request()->route()->getName();
-        return str_starts_with($currentRoute, $pattern) ? $output : '';
-    }
-}
 
 if (!function_exists('getPendingApprovalsCount')) {
-    /**
-     * Get pending approvals count based on user role
-     */
     function getPendingApprovalsCount()
     {
         $user = auth()->user();
@@ -42,43 +29,13 @@ if (!function_exists('getPendingApprovalsCount')) {
     }
 }
 
-if (!function_exists('getUserInitials')) {
-    /**
-     * Get user initials from name
-     */
-    function getUserInitials($user = null)
-    {
-        $user = $user ?? auth()->user();
-        $name = $user->full_name ?? $user->name;
-        
-        return strtoupper(substr($name, 0, 2));
-    }
-}
-
-// if (!function_exists('getLeaveQuota')) {
-//     /**
-//      * Get current user's leave quota
-//      */
-//     function getLeaveQuota($user = null)
-//     {
-//         $user = $user ?? auth()->user();
-//         return $user->leaveQuota;
-//     }
-// }
-
 if (!function_exists('getLeaveQuota')) {
-    /**
-     * Get leave quota for user - KONSISTEN RETURN FORMAT
-     * 
-     * @param \App\Models\User $user
-     * @return array Always return array format
-     */
+
     function getLeaveQuota($user): array
     {
-        $quota = $user->leaveQuota; // Get LeaveQuota model for current year
+        $quota = $user->leaveQuota; 
         
         if (!$quota) {
-            // Jika belum ada quota, return default
             return [
                 'total' => 12,
                 'used' => 0,
@@ -94,18 +51,14 @@ if (!function_exists('getLeaveQuota')) {
     }
 }
 
-
-
 if (!function_exists('formatLeaveStatus')) {
-    /**
-     * Format leave status with badge color
-     */
+
     function formatLeaveStatus($status)
     {
         $badges = [
-            'pending' => ['text' => 'Pending', 'class' => 'bg-yellow-100 text-yellow-800'],
-            'approved_by_leader' => ['text' => 'Approved by Leader', 'class' => 'bg-blue-100 text-blue-800'],
-            'approved' => ['text' => 'Approved', 'class' => 'bg-green-100 text-green-800'],
+            'pending' => ['text' => 'Pending', 'class' => 'bg-[#b5b89b] text-[#334124]'], 
+            'approved_by_leader' => ['text' => 'Approved by Leader', 'class' => 'bg-[#566534] text-white'], 
+            'approved' => ['text' => 'Approved', 'class' => 'bg-[#334124] text-white'],
             'rejected' => ['text' => 'Rejected', 'class' => 'bg-red-100 text-red-800'],
             'cancelled' => ['text' => 'Cancelled', 'class' => 'bg-gray-100 text-gray-800'],
         ];
@@ -116,99 +69,18 @@ if (!function_exists('formatLeaveStatus')) {
     }
 }
 
-if (!function_exists('formatLeaveType')) {
-    /**
-     * Format leave type with icon and color
-     */
-    function formatLeaveType($type)
-    {
-        $types = [
-            'annual' => [
-                'text' => 'Annual Leave',
-                'icon' => '🏖️',
-                'class' => 'bg-blue-100 text-blue-800'
-            ],
-            'sick' => [
-                'text' => 'Sick Leave',
-                'icon' => '🏥',
-                'class' => 'bg-red-100 text-red-800'
-            ],
-        ];
-        
-        $typeValue = is_object($type) ? $type->value : $type;
-        
-        return $types[$typeValue] ?? ['text' => ucfirst($typeValue), 'icon' => '📄', 'class' => 'bg-gray-100 text-gray-800'];
-    }
-}
-
-if (!function_exists('getApprovalRoute')) {
-    /**
-     * Get approval route based on user role
-     */
-    function getApprovalRoute()
-    {
-        $role = auth()->user()->role->value;
-        
-        return match($role) {
-            'leader' => route('leader.approvals.index'),
-            'hrd' => route('hrd.final-approvals.index'),
-            default => '#'
-        };
-    }
-}
-
-if (!function_exists('canApproveLeave')) {
-    /**
-     * Check if user can approve leaves
-     */
-    function canApproveLeave()
-    {
-        return in_array(auth()->user()->role->value, ['leader', 'hrd']);
-    }
-}
-
-if (!function_exists('getDashboardRoute')) {
-    /**
-     * Get dashboard route based on user role
-     */
-    function getDashboardRoute($role = null)
-    {
-        $role = $role ?? auth()->user()->role->value;
-        
-        return route("{$role}.dashboard");
-    }
-}
-
 if (!function_exists('formatDate')) {
-    /**
-     * Format date to Indonesian format
-     */
+
     function formatDate($date, $format = 'd M Y')
     {
         if (!$date) return '-';
         
-        return \Carbon\Carbon::parse($date)->format($format);
-    }
-}
-
-if (!function_exists('calculateQuotaPercentage')) {
-    /**
-     * Calculate quota percentage for progress bar
-     */
-    function calculateQuotaPercentage($remaining, $total = 12)
-    {
-        if ($total == 0) return 0;
-        return round(($remaining / $total) * 100);
+        return Carbon::parse($date)->format($format);
     }
 }
 
 if (!function_exists('fileExists')) {
-    /**
-     * Check if file exists in storage
-     * 
-     * @param string|null $path
-     * @return bool
-     */
+
     function fileExists(?string $path): bool
     {
         if (empty($path)) {
@@ -216,5 +88,93 @@ if (!function_exists('fileExists')) {
         }
         
         return \Storage::disk('public')->exists($path);
+    }
+}
+
+if (!function_exists('uploadProfilePhoto')) {
+
+    function uploadProfilePhoto($file, $oldPath = null): string
+    {
+        if ($oldPath && fileExists($oldPath)) {
+            \Storage::disk('public')->delete($oldPath);
+        }
+
+        $filename = 'profile_' . uniqid() . '_' . time() . '.' . $file->getClientOriginalExtension();
+
+        $path = $file->storeAs('profile_photos', $filename, 'public');
+        
+        return $path;
+    }
+}
+
+if (!function_exists('getProfilePhotoUrl')) {
+
+    function getProfilePhotoUrl($user = null): string
+    {
+        $user = $user ?? auth()->user();
+        
+        if ($user && $user->profile_photo && fileExists($user->profile_photo)) {
+            return asset('storage/' . $user->profile_photo);
+        }
+        
+        $name = $user->full_name ?? $user->name ?? 'User';
+        return 'https://ui-avatars.com/api/?name=' . urlencode($name) . '&color=b5b89b&background=334124&size=200&bold=true';
+    }
+}
+
+if (!function_exists('deleteProfilePhoto')) {
+
+    function deleteProfilePhoto(string $path): bool
+    {
+        if (fileExists($path)) {
+            return \Storage::disk('public')->delete($path);
+        }
+        
+        return false;
+    }
+}
+
+if (!function_exists('canRequestAnnualLeave')) {
+
+    function canRequestAnnualLeave($user = null): bool
+    {
+        $user = $user ?? auth()->user();
+        
+        if (!$user || !$user->join_date) {
+            return false;
+        }
+        
+        $monthsOfService = Carbon::parse($user->join_date)->diffInMonths(now());
+        
+        return $monthsOfService >= 12;
+    }
+}
+
+if (!function_exists('getMonthsOfService')) {
+
+    function getMonthsOfService($user = null): int
+    {
+        $user = $user ?? auth()->user();
+        
+        if (!$user || !$user->join_date) {
+            return 0;
+        }
+        
+        return Carbon::parse($user->join_date)->diffInMonths(now());
+    }
+}
+
+if (!function_exists('getRemainingMonthsToEligible')) {
+    function getRemainingMonthsToEligible($user = null): int
+    {
+        $user = $user ?? auth()->user();
+        
+        if (canRequestAnnualLeave($user)) {
+            return 0;
+        }
+        
+        $monthsOfService = getMonthsOfService($user);
+        
+        return max(0, 12 - $monthsOfService); 
     }
 }

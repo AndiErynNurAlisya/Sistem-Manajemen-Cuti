@@ -8,13 +8,7 @@ use Illuminate\Support\Facades\Log;
 
 class LeaveQuotaService
 {
-    /**
-     * Inisialisasi kuota untuk user baru atau tahun baru
-     * 
-     * @param User $user
-     * @param int|null $year
-     * @return LeaveQuota
-     */
+
     public function initialize(User $user, ?int $year = null): LeaveQuota
     {
         $year = $year ?? now()->year;
@@ -32,42 +26,21 @@ class LeaveQuotaService
         );
     }
     
-    /**
-     * Get kuota user untuk tahun tertentu
-     * 
-     * @param User $user
-     * @param int|null $year
-     * @return LeaveQuota
-     */
+
     public function getQuota(User $user, ?int $year = null): LeaveQuota
     {
         $year = $year ?? now()->year;
         return $this->initialize($user, $year);
     }
     
-    /**
-     * Cek apakah kuota mencukupi
-     * 
-     * @param User $user
-     * @param int $days
-     * @param int|null $year
-     * @return bool
-     */
+
     public function isAvailable(User $user, int $days, ?int $year = null): bool
     {
         $quota = $this->getQuota($user, $year);
         return $quota->remaining_quota >= $days;
     }
     
-    /**
-     * Kurangi kuota (saat pengajuan cuti tahunan)
-     * 
-     * @param User $user
-     * @param int $days
-     * @param int|null $year
-     * @return void
-     * @throws \Exception
-     */
+
     public function deduct(User $user, int $days, ?int $year = null): void
     {
         $quota = $this->getQuota($user, $year);
@@ -86,14 +59,6 @@ class LeaveQuotaService
         ]);
     }
     
-    /**
-     * Kembalikan kuota (saat reject/cancel cuti tahunan)
-     * 
-     * @param User $user
-     * @param int $days
-     * @param int|null $year
-     * @return void
-     */
     public function restore(User $user, int $days, ?int $year = null): void
     {
         $quota = $this->getQuota($user, $year);
@@ -101,7 +66,6 @@ class LeaveQuotaService
         $quota->decrement('used_quota', $days);
         $quota->increment('remaining_quota', $days);
         
-        // Pastikan tidak melebihi total quota
         $quota->refresh();
         if ($quota->remaining_quota > $quota->total_quota) {
             $quota->update([
@@ -117,13 +81,7 @@ class LeaveQuotaService
         ]);
     }
     
-    /**
-     * Get summary kuota user
-     * 
-     * @param User $user
-     * @param int|null $year
-     * @return array
-     */
+
     public function getSummary(User $user, ?int $year = null): array
     {
         $quota = $this->getQuota($user, $year);
@@ -137,18 +95,12 @@ class LeaveQuotaService
         ];
     }
     
-    /**
-     * Reset kuota tahunan untuk semua user (dijalankan awal tahun via cron)
-     * 
-     * @param int|null $year
-     * @return int
-     */
+
     public function resetAnnualQuota(?int $year = null): int
     {
         $year = $year ?? now()->year;
         $count = 0;
         
-        // Get all employee & leader
         $users = User::whereIn('role', ['employee', 'leader'])
                      ->where('is_active', true)
                      ->get();
@@ -163,14 +115,7 @@ class LeaveQuotaService
         return $count;
     }
     
-    /**
-     * Adjust quota untuk user tertentu (misal: tambah/kurangi kuota)
-     * 
-     * @param User $user
-     * @param int $newTotal
-     * @param int|null $year
-     * @return void
-     */
+
     public function adjustQuota(User $user, int $newTotal, ?int $year = null): void
     {
         $quota = $this->getQuota($user, $year);

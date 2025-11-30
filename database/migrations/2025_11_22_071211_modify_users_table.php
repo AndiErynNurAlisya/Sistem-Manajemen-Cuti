@@ -32,7 +32,6 @@ return new class extends Migration
             $table->boolean('is_active')->default(true)->after('division_id');
             $table->date('join_date')->default(now())->after('is_active');
             
-            // Index untuk performance
             $table->index('role');
             $table->index('division_id');
             $table->index('is_active');

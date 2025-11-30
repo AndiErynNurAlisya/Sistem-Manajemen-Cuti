@@ -62,6 +62,14 @@ class LeaveRequestStoreRequest extends FormRequest
                 $quota = $quotaService->getQuota(auth()->user());
                 $validator->errors()->add('leave_type', "Kuota tidak mencukupi. Sisa: {$quota->remaining_quota} hari.");
             }
+
+            if ($this->leave_type === 'annual' && !canRequestAnnualLeave(auth()->user())) {
+                $remainingMonths = getRemainingMonthsToEligible(auth()->user());
+                $validator->errors()->add(
+                    'leave_type', 
+                    "Anda belum memenuhi syarat untuk mengajukan cuti tahunan. Minimal masa kerja 1 tahun. Sisa waktu: {$remainingMonths} bulan lagi."
+                );
+            }
             
             // Check overlap & max pending
             $this->validateOverlap($validator);

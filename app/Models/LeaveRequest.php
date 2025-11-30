@@ -43,41 +43,26 @@ class LeaveRequest extends Model
         'total_days' => 'integer',
     ];
 
-    /**
-     * RELASI: LeaveRequest belongs to User
-     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * RELASI: LeaveRequest has many LeaveApprovals
-     */
     public function approvals(): HasMany
     {
         return $this->hasMany(LeaveApproval::class)->orderBy('created_at');
     }
 
-    /**
-     * RELASI: Get leader approval
-     */
     public function leaderApproval(): HasMany
     {
         return $this->hasMany(LeaveApproval::class)->where('approver_role', 'leader');
     }
 
-    /**
-     * RELASI: Get HRD approval
-     */
     public function hrdApproval(): HasMany
     {
         return $this->hasMany(LeaveApproval::class)->where('approver_role', 'hrd');
     }
 
-    /**
-     * ACCESSOR: Get medical certificate URL
-     */
     public function getMedicalCertificateUrlAttribute(): ?string
     {
         return $this->medical_certificate 
@@ -85,9 +70,6 @@ class LeaveRequest extends Model
             : null;
     }
 
-    /**
-     * ACCESSOR: Get request letter URL
-     */
     public function getRequestLetterUrlAttribute(): ?string
     {
         return $this->request_letter_pdf 
@@ -95,9 +77,6 @@ class LeaveRequest extends Model
             : null;
     }
 
-    /**
-     * ACCESSOR: Get approval letter URL
-     */
     public function getApprovalLetterUrlAttribute(): ?string
     {
         return $this->approval_letter_pdf 
@@ -105,94 +84,61 @@ class LeaveRequest extends Model
             : null;
     }
 
-    /**
-     * ACCESSOR: Format periode
-     */
     public function getPeriodAttribute(): string
     {
         return $this->start_date->format('d M Y') . ' - ' . $this->end_date->format('d M Y');
     }
 
-    /**
-     * Check if can be cancelled
-     */
     public function canBeCancelled(): bool
     {
         return $this->status->canBeCancelled();
     }
 
-    /**
-     * Check if needs leader approval
-     */
     public function needsLeaderApproval(): bool
     {
         return $this->status === LeaveStatus::PENDING && 
                $this->user->role->value !== 'leader';
     }
 
-    /**
-     * Check if needs HRD approval
-     */
     public function needsHRDApproval(): bool
     {
         return in_array($this->status, [
-            LeaveStatus::PENDING,  // Dari leader
-            LeaveStatus::APPROVED_BY_LEADER  // Dari employee
+            LeaveStatus::PENDING,
+            LeaveStatus::APPROVED_BY_LEADER
         ]);
     }
 
-    /**
-     * SCOPE: Filter by status
-     */
     public function scopeStatus($query, $status)
     {
         return $query->where('status', $status);
     }
 
-    /**
-     * SCOPE: Filter by leave type
-     */
     public function scopeType($query, $type)
     {
         return $query->where('leave_type', $type);
     }
 
-    /**
-     * SCOPE: Pending requests
-     */
     public function scopePending($query)
     {
         return $query->where('status', 'pending');
     }
 
-    /**
-     * SCOPE: Approved by leader
-     */
     public function scopeApprovedByLeader($query)
     {
         return $query->where('status', 'approved_by_leader');
     }
 
-    /**
-     * SCOPE: Final approved
-     */
     public function scopeApproved($query)
     {
         return $query->where('status', 'approved');
     }
 
-    /**
-     * SCOPE: Current month
-     */
     public function scopeCurrentMonth($query)
     {
         return $query->whereMonth('start_date', now()->month)
                      ->whereYear('start_date', now()->year);
     }
 
-    /**
-     * SCOPE: This week
-     */
     public function scopeThisWeek($query)
     {
         return $query->whereBetween('start_date', [

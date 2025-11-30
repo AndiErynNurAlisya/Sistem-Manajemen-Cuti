@@ -1,4 +1,3 @@
-{{-- Dashboard --}}
 <x-navigation.menu-item href="{{ route('employee.dashboard') }}">
     <x-slot:icon>
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -7,7 +6,6 @@
     Dashboard
 </x-navigation.menu-item>
 
-{{-- My Leave Requests --}}
 <x-navigation.menu-item href="{{ route('employee.leave-requests.index') }}">
     <x-slot:icon>
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -16,7 +14,6 @@
     My Leave Requests
 </x-navigation.menu-item>
 
-{{-- Apply for Leave --}}
 <x-navigation.menu-item href="{{ route('employee.leave-requests.create') }}">
     <x-slot:icon>
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -27,5 +24,4 @@
 
 <div class="my-3 border-t border-gray-200"></div>
 
-{{-- Leave Quota Widget --}}
 <x-ui.quota-widget />

@@ -27,24 +27,19 @@ class DashboardController extends BaseController
             return $this->error('Anda belum terdaftar di divisi manapun.', 'employee.dashboard');
         }
         
-        // Get member IDs dari divisi
         $memberIds = $division->members->pluck('id')->toArray();
         
-        // Total pengajuan cuti masuk dari anggota
         $totalIncomingLeaves = LeaveRequest::whereIn('user_id', $memberIds)
             ->where('user_id', '!=', $user->id) // Exclude cuti leader sendiri
             ->count();
         
-        // Pengajuan pending verifikasi
         $pendingApprovals = LeaveRequest::whereIn('user_id', $memberIds)
             ->where('user_id', '!=', $user->id)
             ->where('status', 'pending')
             ->count();
         
-        // Kuota cuti leader sendiri
         $quotaSummary = $this->quotaService->getSummary($user);
         
-        // Anggota yang sedang cuti minggu ini
         $membersOnLeaveThisWeek = LeaveRequest::whereIn('user_id', $memberIds)
             ->where('status', 'approved')
             ->where('start_date', '<=', now()->endOfWeek())
@@ -52,7 +47,6 @@ class DashboardController extends BaseController
             ->with('user')
             ->get();
         
-        // Pengajuan yang butuh approval (pending)
         $pendingLeaveRequests = LeaveRequest::whereIn('user_id', $memberIds)
             ->where('user_id', '!=', $user->id)
             ->where('status', 'pending')

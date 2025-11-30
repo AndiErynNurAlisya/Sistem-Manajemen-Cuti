@@ -3,11 +3,16 @@
 
 @php
     $typeColors = [
-        'annual' => 'bg-blue-100 text-blue-800',
-        'sick' => 'bg-red-100 text-red-800',
+        // Annual = Army Gelap
+        'annual' => 'bg-[#334124] text-white',
+
+        // Sick = Agak Cream
+        'sick' => 'bg-[#b5b89b] text-[#334124]',
     ];
     
-    $colorClass = $typeColors[$type->value] ?? 'bg-gray-100 text-gray-800';
+    // Default = warna dashboard
+    $colorClass = $typeColors[$type->value] ?? 'bg-[#566534] text-white';
+
     $label = $type->label();
 @endphp
 

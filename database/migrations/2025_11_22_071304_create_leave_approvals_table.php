@@ -27,7 +27,6 @@ return new class extends Migration
             
             $table->timestamps();
             
-            // Indexes
             $table->index('leave_request_id');
             $table->index('approver_id');
             $table->index('approver_role');

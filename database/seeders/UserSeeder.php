@@ -32,7 +32,7 @@ class UserSeeder extends Seeder
         //     'email_verified_at' => now(),
         // ]);
         
-        // // 2. HRD
+        // 2. HRD
         // User::create([
         //     'name' => 'hrd',
         //     'email' => 'hrd@umrahtravel.com',
@@ -47,144 +47,82 @@ class UserSeeder extends Seeder
         //     'email_verified_at' => now(),
         // ]);
         
-        // Get divisions
-        $tourOps = Division::where('name', 'Tour Operations')->first();
-        $marketing = Division::where('name', 'Marketing & Sales')->first();
-        $finance = Division::where('name', 'Finance & Administration')->first();
-        
-        // 3. LEADERS (Ketua Divisi)
-        $leader1 = User::create([
-            'name' => 'leader1',
-            'email' => 'ahmad.rizki@umrahtravel.com',
+
+        // ================================================
+        //                CAFE DIVISIONS
+        // ================================================
+
+        // Ambil divisi (pastikan sudah ada di DivisionSeeder)
+        $barista = Division::where('name', 'Barista')->first();
+        $kitchen = Division::where('name', 'Kitchen')->first();
+
+        // ================================================
+        //                LEADERS (1 per divisi)
+        // ================================================
+
+        $leaderBarista = User::create([
+            'name' => 'leader_barista',
+            'email' => 'leader.barista@cafe.com',
             'password' => $password,
-            'full_name' => 'Ahmad Rizki',
-            'phone' => '081234567892',
-            'address' => 'Bekasi',
+            'full_name' => 'Rizky Setiawan',
+            'phone' => '081234500001',
+            'address' => 'Jakarta Selatan',
             'role' => 'leader',
-            'division_id' => $tourOps->id,
+            'division_id' => $barista->id,
             'is_active' => true,
-            'join_date' => '2020-02-01',
+            'join_date' => '2021-01-01',
             'email_verified_at' => now(),
         ]);
-        
-        $leader2 = User::create([
-            'name' => 'leader2',
-            'email' => 'budi.santoso@umrahtravel.com',
+
+        $leaderKitchen = User::create([
+            'name' => 'leader_kitchen',
+            'email' => 'leader.kitchen@cafe.com',
             'password' => $password,
-            'full_name' => 'Budi Santoso',
-            'phone' => '081234567893',
-            'address' => 'Tangerang',
+            'full_name' => 'Siti Ramadhani',
+            'phone' => '081234500002',
+            'address' => 'Bogor',
             'role' => 'leader',
-            'division_id' => $marketing->id,
+            'division_id' => $kitchen->id,
             'is_active' => true,
-            'join_date' => '2020-02-15',
+            'join_date' => '2021-01-05',
             'email_verified_at' => now(),
         ]);
-        
-        $leader3 = User::create([
-            'name' => 'leader3',
-            'email' => 'dewi.lestari@umrahtravel.com',
-            'password' => $password,
-            'full_name' => 'Dewi Lestari',
-            'phone' => '081234567894',
-            'address' => 'Depok',
-            'role' => 'leader',
-            'division_id' => $finance->id,
-            'is_active' => true,
-            'join_date' => '2020-03-01',
-            'email_verified_at' => now(),
-        ]);
-        
+
         // Update divisions dengan leader_id
-        $tourOps->update(['leader_id' => $leader1->id]);
-        $marketing->update(['leader_id' => $leader2->id]);
-        $finance->update(['leader_id' => $leader3->id]);
-        
-        // 4. EMPLOYEES (Karyawan)
-        // Tour Operations Team
+        $barista->update(['leader_id' => $leaderBarista->id]);
+        $kitchen->update(['leader_id' => $leaderKitchen->id]);
+
+        // ================================================
+        //                EMPLOYEES (1 per divisi)
+        // ================================================
+
+        // BARISTA STAFF
         User::create([
-            'name' => 'employee1',
-            'email' => 'john.doe@umrahtravel.com',
+            'name' => 'barista1',
+            'email' => 'barista.staff@cafe.com',
             'password' => $password,
-            'full_name' => 'John Doe',
-            'phone' => '081234567895',
-            'address' => 'Jakarta Timur',
-            'role' => 'employee',
-            'division_id' => $tourOps->id,
-            'is_active' => true,
-            'join_date' => '2021-06-01',
-            'email_verified_at' => now(),
-        ]);
-        
-        User::create([
-            'name' => 'employee2',
-            'email' => 'jane.smith@umrahtravel.com',
-            'password' => $password,
-            'full_name' => 'Jane Smith',
-            'phone' => '081234567896',
+            'full_name' => 'Andi Barista',
+            'phone' => '081234500101',
             'address' => 'Jakarta Barat',
             'role' => 'employee',
-            'division_id' => $tourOps->id,
-            'is_active' => true,
-            'join_date' => '2021-07-15',
-            'email_verified_at' => now(),
-        ]);
-        
-        // Marketing Team
-        User::create([
-            'name' => 'employee3',
-            'email' => 'andi.wijaya@umrahtravel.com',
-            'password' => $password,
-            'full_name' => 'Andi Wijaya',
-            'phone' => '081234567897',
-            'address' => 'Bogor',
-            'role' => 'employee',
-            'division_id' => $marketing->id,
+            'division_id' => $barista->id,
             'is_active' => true,
             'join_date' => '2022-01-10',
             'email_verified_at' => now(),
         ]);
-        
+
+        // KITCHEN STAFF
         User::create([
-            'name' => 'employee4',
-            'email' => 'sari.melati@umrahtravel.com',
+            'name' => 'kitchen1',
+            'email' => 'kitchen.staff@cafe.com',
             'password' => $password,
-            'full_name' => 'Sari Melati',
-            'phone' => '081234567898',
-            'address' => 'Jakarta Utara',
+            'full_name' => 'Dewi Kitchen',
+            'phone' => '081234500102',
+            'address' => 'Jakarta Timur',
             'role' => 'employee',
-            'division_id' => $marketing->id,
+            'division_id' => $kitchen->id,
             'is_active' => true,
-            'join_date' => '2022-03-20',
-            'email_verified_at' => now(),
-        ]);
-        
-        // Finance Team
-        User::create([
-            'name' => 'employee5',
-            'email' => 'rudi.hartono@umrahtravel.com',
-            'password' => $password,
-            'full_name' => 'Rudi Hartono',
-            'phone' => '081234567899',
-            'address' => 'Tangerang Selatan',
-            'role' => 'employee',
-            'division_id' => $finance->id,
-            'is_active' => true,
-            'join_date' => '2021-09-01',
-            'email_verified_at' => now(),
-        ]);
-        
-        User::create([
-            'name' => 'employee6',
-            'email' => 'linda.permata@umrahtravel.com',
-            'password' => $password,
-            'full_name' => 'Linda Permata',
-            'phone' => '081234567800',
-            'address' => 'Bekasi Timur',
-            'role' => 'employee',
-            'division_id' => $finance->id,
-            'is_active' => true,
-            'join_date' => '2022-05-15',
+            'join_date' => '2022-02-05',
             'email_verified_at' => now(),
         ]);
     }

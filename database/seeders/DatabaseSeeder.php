@@ -14,7 +14,6 @@ class DatabaseSeeder extends Seeder
         $this->call([
             DivisionSeeder::class,
             UserSeeder::class,
-            LeaveQuotaSeeder::class,
         ]);
     }
 }

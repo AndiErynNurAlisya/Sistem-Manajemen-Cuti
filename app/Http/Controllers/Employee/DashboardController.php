@@ -22,26 +22,22 @@ class DashboardController extends BaseController
     {
         $user = $this->user();
         
-        // Get kuota cuti
         $quotaSummary = $this->quotaService->getSummary($user);
         
-        // Jumlah cuti sakit yang diajukan (tahun ini)
         $totalSickLeaves = LeaveRequest::where('user_id', $user->id)
             ->where('leave_type', 'sick')
             ->whereYear('created_at', now()->year)
             ->count();
         
-        // Total pengajuan cuti (semua status)
         $totalLeaveRequests = LeaveRequest::where('user_id', $user->id)->count();
         
-        // Pengajuan cuti terakhir (5 terbaru)
         $recentLeaves = LeaveRequest::where('user_id', $user->id)
             ->with('approvals.approver')
             ->latest()
             ->take(5)
             ->get();
         
-        // Pengajuan pending
+
         $pendingLeaves = LeaveRequest::where('user_id', $user->id)
             ->where('status', 'pending')
             ->count();

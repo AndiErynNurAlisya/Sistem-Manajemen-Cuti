@@ -1,21 +1,16 @@
 <x-app-layout>
+    <x-slot name="pageTitle">Edit Divisi</x-slot>
+    <x-slot name="pageDescription">Edit informasi divisi</x-slot>
 
-    <x-slot name="header">
-        <div class="flex items-center justify-between">
-            <h1 class="text-2xl font-semibold text-gray-800">
-                Edit Divisi
-            </h1>
-
-            <x-breeze.back-link 
-                href="{{ route('admin.divisions.index') }}" 
-                label="← Kembali ke Daftar Divisi" 
-            />
+    <div class="mb-6">
+        <div class="flex items-center space-x-2 text-sm text-gray-500">
+            <a href="{{ route('admin.divisions.index') }}" class="hover:text-[#566534] transition">Division List</a>
+            <span>/</span>
+            <span class="text-gray-900 font-medium">{{ $division->name }}</span>
         </div>
-    </x-slot>
-
+    </div>
     <div class="max-w-4xl mx-auto bg-white p-8 sm:rounded-lg shadow">
 
-        {{-- Error Global --}}
         @if ($errors->any())
             <div class="mb-6 p-4 bg-red-100 text-red-700 rounded-md">
                 <b>Terjadi kesalahan:</b>
@@ -34,8 +29,6 @@
         >
             @csrf
             @method('PUT')
-
-            {{-- Nama Divisi --}}
             <div>
                 <x-breeze.input-label for="name" value="Nama Divisi" />
                 <x-breeze.text-input
@@ -49,8 +42,6 @@
                 />
                 <x-breeze.input-error :messages="$errors->get('name')" class="mt-2" />
             </div>
-
-            {{-- Ketua Divisi --}}
             <div>
                 <x-breeze.input-label for="leader_id" value="Ketua Divisi" />
 
@@ -66,8 +57,6 @@
 
                 <x-breeze.input-error :messages="$errors->get('leader_id')" class="mt-2" />
             </div>
-
-            {{-- Tanggal Berdiri --}}
             <div>
                 <x-breeze.input-label for="established_date" value="Tanggal Berdiri" />
                 <x-breeze.text-input
@@ -80,8 +69,6 @@
                 />
                 <x-breeze.input-error :messages="$errors->get('established_date')" class="mt-2" />
             </div>
-
-            {{-- Deskripsi --}}
             <div>
                 <x-breeze.input-label for="description" value="Deskripsi (Opsional)" />
                 <x-breeze.textarea
@@ -93,8 +80,6 @@
 
                 <x-breeze.input-error :messages="$errors->get('description')" class="mt-2" />
             </div>
-
-            {{-- Tombol --}}
             <div class="text-right flex gap-3 justify-end">
                 
                 <x-breeze.secondary-button

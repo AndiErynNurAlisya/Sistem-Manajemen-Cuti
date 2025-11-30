@@ -23,57 +23,36 @@ class LeaveApproval extends Model
         'approved_at' => 'datetime',
     ];
 
-    /**
-     * RELASI: LeaveApproval belongs to LeaveRequest
-     */
     public function leaveRequest(): BelongsTo
     {
         return $this->belongsTo(LeaveRequest::class);
     }
 
-    /**
-     * RELASI: LeaveApproval belongs to User (approver)
-     */
     public function approver(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approver_id');
     }
 
-    /**
-     * ACCESSOR: Check if approved
-     */
     public function isApproved(): bool
     {
         return $this->status === 'approved';
     }
 
-    /**
-     * ACCESSOR: Check if rejected
-     */
     public function isRejected(): bool
     {
         return $this->status === 'rejected';
     }
 
-    /**
-     * SCOPE: By approver role
-     */
     public function scopeByRole($query, $role)
     {
         return $query->where('approver_role', $role);
     }
 
-    /**
-     * SCOPE: Approved
-     */
     public function scopeApproved($query)
     {
         return $query->where('status', 'approved');
     }
 
-    /**
-     * SCOPE: Rejected
-     */
     public function scopeRejected($query)
     {
         return $query->where('status', 'rejected');

@@ -7,6 +7,7 @@ use App\Http\Requests\ApprovalRequest;
 use App\Models\LeaveRequest;
 use App\Services\LeaveApprovalService;
 use Illuminate\Http\Request;
+use App\Enums\LeaveStatus;
 
 class LeaveApprovalController extends BaseController
 {
@@ -35,17 +36,14 @@ class LeaveApprovalController extends BaseController
             ->pluck('id')
             ->toArray();
         
-        // Query pengajuan pending dari anggota
         $query = LeaveRequest::whereIn('user_id', $memberIds)
-            ->where('status', 'pending')
+            ->where('status', LeaveStatus::PENDING->value) // 
             ->with(['user', 'user.division']);
         
-        // Filter by leave type
         if ($request->filled('leave_type')) {
             $query->where('leave_type', $request->leave_type);
         }
-        
-        // Search by employee name
+    
         if ($request->filled('search')) {
             $search = $request->search;
             $query->whereHas('user', function($q) use ($search) {
@@ -54,7 +52,6 @@ class LeaveApprovalController extends BaseController
             });
         }
         
-        // Sort
         $query->latest('created_at');
         
         $pendingLeaves = $this->paginate($query);
@@ -69,14 +66,12 @@ class LeaveApprovalController extends BaseController
     {
         $user = $this->user();
         
-        // Validasi: pengajuan harus dari anggota divisi leader
         if ($leaveRequest->user->division_id !== $user->division_id) {
             abort(403, 'Anda tidak memiliki akses untuk meng-approve pengajuan ini.');
         }
         
-        // Validasi: status harus pending
-        if ($leaveRequest->status->value !== 'pending') {
-            return $this->error('Pengajuan ini sudah diproses sebelumnya.', 'leader.approvals.index');
+        if ($leaveRequest->status !== LeaveStatus::PENDING) {
+            return $this->success('Pengajuan ini sudah berhasil disetujui.', 'leader.approvals.index');
         }
         
         $leaveRequest->load(['user', 'user.division', 'user.leaveQuota']);
@@ -91,7 +86,6 @@ class LeaveApprovalController extends BaseController
     {
         $user = $this->user();
         
-        // Validasi ownership divisi
         if ($leaveRequest->user->division_id !== $user->division_id) {
             abort(403, 'Anda tidak memiliki akses untuk meng-approve pengajuan ini.');
         }
@@ -116,7 +110,6 @@ class LeaveApprovalController extends BaseController
     {
         $user = $this->user();
         
-        // Validasi ownership divisi
         if ($leaveRequest->user->division_id !== $user->division_id) {
             abort(403, 'Anda tidak memiliki akses untuk menolak pengajuan ini.');
         }

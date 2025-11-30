@@ -40,21 +40,39 @@
             'text' => 'text-green-600',
             'progress' => 'bg-green-600'
         ],
+        'army' => [
+            'border' => 'border-[#566534] ',
+            'bg' => 'bg-[#b5b89b] ',
+            'text' => 'text-[#334124] ',
+            'progress' => 'bg-[#334124] '
+        ],
+        'white' => [
+            'border' => 'border-white ',
+            'bg' => 'bg-[#b5b89b] ',
+            'text' => 'text-black ',
+            'progress' => 'bg-gray-900 '
+        ],
+        'second' => [
+            'border' => 'border-[#718355] ',
+            'bg' => 'bg-gradient-to-b from-[#cfbb99] to-[#e5d7c4] shadow-md ',
+            'text' => 'text-[#444c32] ',
+            'progress' => 'bg-[#444c32] '
+        ]
     ];
     
     $colorClass = $colors[$color] ?? $colors['indigo'];
 @endphp
 
-<div class="bg-white rounded-lg shadow-sm p-6 border-l-4 {{ $colorClass['border'] }}">
+<div class="bg-white rounded-lg shadow-xl p-6 border-l-4 {{ $colorClass['border'] }}">
     <div class="flex items-center justify-between">
         <div>
-            <p class="text-sm font-medium text-gray-600">{{ $title }}</p>
+            <p class="text-sm font-medium text-gray-600 whitespace-nowrap">{{ $title }}</p>
             <p class="text-3xl font-bold text-gray-900 mt-2">{{ $value }}</p>
             @if($subtitle)
-                <p class="text-xs text-gray-500 mt-1">{{ $subtitle }}</p>
+                <p class="text-sm text-gray-500 mt-1">{{ $subtitle }}</p>
             @endif
         </div>
-        <div class="p-3 {{ $colorClass['bg'] }} rounded-full">
+        <div class="p-3 mt-2 {{ $colorClass['bg'] }} rounded-full -ml-8 ">
             <svg class="w-8 h-8 {{ $colorClass['text'] }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 {!! $icon !!}
             </svg>

@@ -1,23 +1,14 @@
-{{-- resources/views/admin/users/create.blade.php --}}
-
 <x-app-layout>
-    <x-slot name="header">
-        <div class="flex items-center justify-between">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ __('Tambah User Baru') }}
-            </h2>
- <x-breeze.back-link href="{{ route('admin.users.index') }}" label="← Kembali ke Daftar User" />
-        </div>
-    </x-slot>
+    <x-slot name="pageTitle">Tambah Pengguna</x-slot>
+    <x-slot name="pageDescription">Tambah pengguna baru</x-slot>
 
-    <div class="py-12">
+    <div >
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
                     <form action="{{ route('admin.users.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
                         @csrf
 
-                        {{-- FULL NAME --}}
                         <div>
                             <x-breeze.input-label for="full_name" value="Nama Lengkap" />
                             <x-breeze.text-input 
@@ -32,7 +23,6 @@
                             <x-breeze.input-error :messages="$errors->get('full_name')" class="mt-2" />
                         </div>
 
-                        {{-- USERNAME / NAME --}}
                         <div>
                             <x-breeze.input-label for="name" value="Username" />
                             <x-breeze.text-input 
@@ -47,7 +37,6 @@
                             <p class="mt-1 text-sm text-gray-500">Username digunakan untuk login</p>
                         </div>
 
-                        {{-- EMAIL --}}
                         <div>
                             <x-breeze.input-label for="email" value="Email" />
                             <x-breeze.text-input 
@@ -61,21 +50,18 @@
                             <x-breeze.input-error :messages="$errors->get('email')" class="mt-2" />
                         </div>
 
-                        {{-- ROLE --}}
                         <div>
                             <x-breeze.input-label for="role" value="Role" />
                             <select 
                                 id="role" 
                                 name="role" 
-                                class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                                class="mt-1 block w-full border-[#334124] focus:border-[#b5b89b] focus:ring-[#b5b89b] rounded-md shadow-sm"
                                 required>
                                 <option value="">-- Pilih Role --</option>
                                 @foreach(\App\Enums\UserRole::cases() as $role)
                                     @php
-                                        // Hide admin if already exists
                                         if ($role->value === 'admin' && $adminExists) continue;
 
-                                        // Hide HRD if already exists
                                         if ($role->value === 'hrd' && $hrdExists) continue;
                                     @endphp
 
@@ -97,13 +83,12 @@
                             @endif
                         </div>
 
-                        {{-- DIVISION --}}
                         <div>
                             <x-breeze.input-label for="division_id" value="Divisi" />
                             <select 
                                 id="division_id" 
                                 name="division_id" 
-                                class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                class="mt-1 block w-full border-[#334124] focus:border-[#b5b89b] focus:ring-[#b5b89b] rounded-md shadow-sm">
                                 <option value="">-- Pilih Divisi (Opsional) --</option>
                                 @foreach($divisions as $division)
                                     <option value="{{ $division->id }}" {{ old('division_id') == $division->id ? 'selected' : '' }}>
@@ -115,7 +100,6 @@
                             <p class="mt-1 text-sm text-gray-500">Wajib untuk Employee dan Leader</p>
                         </div>
 
-                        {{-- JOIN DATE --}}
                         <div>
                             <x-breeze.input-label for="join_date" value="Tanggal Bergabung" />
                             <x-breeze.text-input 
@@ -129,7 +113,6 @@
                             <x-breeze.input-error :messages="$errors->get('join_date')" class="mt-2" />
                         </div>
 
-                        {{-- PASSWORD --}}
                         <div>
                             <x-breeze.input-label for="password" value="Password" />
                             <x-breeze.text-input 
@@ -144,7 +127,6 @@
                             <p class="mt-1 text-sm text-gray-500">Minimal 8 karakter</p>
                         </div>
 
-                        {{-- PASSWORD CONFIRMATION --}}
                         <div>
                             <x-breeze.input-label for="password_confirmation" value="Konfirmasi Password" />
                             <x-breeze.text-input 
@@ -157,7 +139,6 @@
                             />
                         </div>
 
-                        {{-- ACTIVE STATUS --}}
                         <div class="flex items-start">
                             <div class="flex items-center h-5">
                                 <input 
@@ -175,10 +156,7 @@
                             </div>
                         </div>
 
-                        {{-- Divider --}}
                         <div class="border-t border-gray-200"></div>
-
-                        {{-- SUBMIT BUTTONS --}}
                         <div class="flex items-center justify-end gap-4">
                             <x-breeze.secondary-button type="button" onclick="window.history.back()">
                                 Batal
@@ -189,7 +167,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                 </svg>
                                 Simpan User
-                            </x-breeze.primary-button>
+                            </x-b-breeze.primary-button>
                         </div>
                     </form>
                 </div>

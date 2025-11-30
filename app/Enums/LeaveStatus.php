@@ -10,9 +10,6 @@ enum LeaveStatus: string
     case REJECTED = 'rejected';
     case CANCELLED = 'cancelled';
     
-    /**
-     * Get label
-     */
     public function label(): string
     {
         return match($this) {
@@ -24,9 +21,6 @@ enum LeaveStatus: string
         };
     }
     
-    /**
-     * Get badge color
-     */
     public function color(): string
     {
         return match($this) {
@@ -38,41 +32,26 @@ enum LeaveStatus: string
         };
     }
     
-    /**
-     * Check if can be cancelled
-     */
     public function canBeCancelled(): bool
     {
         return $this === self::PENDING;
     }
     
-    /**
-     * Check if is final status
-     */
     public function isFinal(): bool
     {
         return in_array($this, [self::APPROVED, self::REJECTED, self::CANCELLED]);
     }
-    
-    /**
-     * Check if is approved (any level)
-     */
+
     public function isApproved(): bool
     {
         return in_array($this, [self::APPROVED_BY_LEADER, self::APPROVED]);
     }
     
-    /**
-     * Get all values
-     */
     public static function values(): array
     {
         return array_column(self::cases(), 'value');
     }
-    
-    /**
-     * Get options for filter
-     */
+
     public static function options(): array
     {
         return collect(self::cases())->mapWithKeys(function ($case) {

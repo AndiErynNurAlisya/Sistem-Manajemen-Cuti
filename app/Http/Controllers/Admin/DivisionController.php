@@ -17,18 +17,49 @@ class DivisionController extends BaseController
     {
         $query = Division::with(['leader', 'members'])->withCount('members');
         
-        // Filter by name
         if ($request->filled('search')) {
             $query->where('name', 'like', "%{$request->search}%");
         }
         
-        // Sort
+        if ($request->filled('leader')) {
+            $query->whereHas('leader', function($q) use ($request) {
+                $q->where('name', 'like', "%{$request->leader}%")
+                  ->orWhere('full_name', 'like', "%{$request->leader}%");
+            });
+        }
+        
+        if ($request->filled('member_count')) {
+            $memberCount = $request->member_count;
+            
+            if ($memberCount === '0') {
+                $query->has('members', '=', 0);
+            } elseif ($memberCount === '50+') {
+                $query->has('members', '>=', 50);
+            } else {
+                [$min, $max] = explode('-', $memberCount);
+                $query->has('members', '>=', (int)$min)
+                      ->has('members', '<=', (int)$max);
+            }
+        }
+        
         $sortBy = $request->get('sort_by', 'created_at');
         $sortOrder = $request->get('sort_order', 'desc');
-        $query->orderBy($sortBy, $sortOrder);
+        
+        $allowedSortColumns = ['name', 'created_at'];
+        
+        if (in_array($sortBy, $allowedSortColumns)) {
+            $query->orderBy($sortBy, $sortOrder);
+        } 
+
+        elseif ($sortBy === 'members_count') {
+            $query->orderBy('members_count', $sortOrder);
+        }
+        else {
+            $query->orderBy('created_at', 'desc');
+        }
         
         $divisions = $this->paginate($query);
-        
+                
         return view('admin.divisions.index', compact('divisions'));
     }
     
@@ -107,11 +138,24 @@ class DivisionController extends BaseController
     
     /**
      * Remove the specified division
+     * 
      */
-    public function destroy(Division $division)
+    public function destroy(Request $request, Division $division)
     {
+        // 🆕 Validasi konfirmasi nama divisi
+        $request->validate([
+            'division_name_confirmation' => [
+                'required',
+                'string',
+                function ($attribute, $value, $fail) use ($division) {
+                    if ($value !== $division->name) {
+                        $fail('Nama divisi tidak sesuai. Ketik "' . $division->name . '" untuk konfirmasi.');
+                    }
+                },
+            ],
+        ]);
+        
         return $this->transaction(function() use ($division) {
-            // Set division_id = null untuk semua member
             $division->members()->update(['division_id' => null]);
             
             $division->delete();
@@ -143,7 +187,6 @@ class DivisionController extends BaseController
             'division_id' => $division->id,
         ]);
 
-        // Jika user adalah leader dan divisi belum punya leader, set sebagai leader
         if ($user->role->value === 'leader' && !$division->leader_id) {
             $division->update([
                 'leader_id' => $user->id,
@@ -163,7 +206,6 @@ class DivisionController extends BaseController
             return back()->withErrors(['error' => 'Tidak dapat menghapus Ketua Divisi. Ubah ketua terlebih dahulu.']);
         }
 
-        // Hapus division_id dari user
         $user->update([
             'division_id' => null,
         ]);

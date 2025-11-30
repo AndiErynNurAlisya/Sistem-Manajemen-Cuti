@@ -18,11 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions) {
         //
     })
-    // =======================================================
-    // TAMBAHKAN BLOCK withProviders DI SINI:
-    // =======================================================
     ->withProviders([
-        App\Providers\HelperServiceProvider::class, // <-- Baris yang Anda tambahkan
+        App\Providers\HelperServiceProvider::class, 
     ])
-    // =======================================================
     ->create();

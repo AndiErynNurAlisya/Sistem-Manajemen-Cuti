@@ -1,7 +1,7 @@
-{{-- resources/views/layouts/app.blade.php --}}
-
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" x-data="{ sidebarOpen: false }" x-cloak>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" 
+      x-data="{ sidebarOpen: false }" 
+      x-cloak>
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -9,26 +9,43 @@
 
     <title>{{ $title ?? config('app.name', 'Sistem Cuti') }}</title>
 
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
-    <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
     <style>
         [x-cloak] { display: none !important; }
     </style>
+    
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.store('sidebar', {
+                collapsed: localStorage.getItem('sidebarCollapsed') === 'true' || false,
+                
+                toggle() {
+                    this.collapsed = !this.collapsed;
+                    localStorage.setItem('sidebarCollapsed', this.collapsed);
+                }
+            });
+        });
+    </script>
 </head>
-<body class="font-sans antialiased bg-gray-100">
+<body class="font-sans antialiased bg-[#f6f4f0]">
     <div class="min-h-screen">
         <!-- Sidebar Component -->
         <x-layout.sidebar />
 
-        <!-- Main Content Wrapper -->
-        <div class="lg:pl-64">
-            <!-- Navbar Component -->
-            <x-layout.navbar />
+        <!-- Main Content Wrapper with dynamic padding -->
+        <div class="transition-all duration-300"
+             :class="{ 'lg:pl-64': !$store.sidebar.collapsed, 'lg:pl-20': $store.sidebar.collapsed }">
+            <!-- Navbar Component with Slots -->
+            <x-layout.navbar 
+                :pageTitle="$pageTitle ?? null"
+                :pageDescription="$pageDescription ?? null"
+                :headerAction="$headerAction ?? null"
+                :breadcrumb="$breadcrumb ?? null"
+            />
 
             <!-- Page Content -->
             <main class="py-6">

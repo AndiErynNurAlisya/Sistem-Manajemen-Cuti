@@ -26,51 +26,51 @@ class LeaveRequestController extends BaseController
         $this->pdfService = $pdfService;
     }
     
-    /**
-     * Display a listing of leader's own leave requests
-     */
     public function index(Request $request)
     {
         $query = LeaveRequest::where('user_id', $this->user()->id)
             ->with('approvals.approver');
-        
-        // Filter by status
+
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
-        
+
+        if ($request->filled('leave_type')) {
+            $query->where('leave_type', $request->leave_type);
+        }
+
+        if ($request->filled('start_date')) {
+            $query->whereDate('start_date', '>=', $request->start_date);
+        }
+
+        if ($request->filled('end_date')) {
+            $query->whereDate('end_date', '<=', $request->end_date);
+        }
+
         $query->latest();
-        
+
         $leaveRequests = $this->paginate($query);
-        
+
         return view('leader.leave-requests.index', compact('leaveRequests'));
     }
-    
-    /**
-     * Show the form for creating a new leave request
-     */
+
     public function create()
     {
         $quota = $this->quotaService->getQuota($this->user());
         
         return view('leader.leave-requests.create', compact('quota'));
     }
-    
-    /**
-     * Store a newly created leave request (langsung ke HRD, skip approval leader)
-     */
+
     public function store(LeaveRequestStoreRequest $request)
     {
         return $this->transaction(function() use ($request) {
             $user = $this->user();
             
-            // Hitung total hari kerja
             $totalDays = $this->calculator->calculate(
                 $request->start_date,
                 $request->end_date
             );
             
-            // Prepare data
             $data = [
                 'user_id' => $user->id,
                 'leave_type' => $request->leave_type,
@@ -81,10 +81,9 @@ class LeaveRequestController extends BaseController
                 'reason' => $request->reason,
                 'address_during_leave' => $request->address_during_leave,
                 'emergency_contact' => $request->emergency_contact,
-                'status' => 'pending', // Langsung pending untuk HRD
+                'status' => 'pending',
             ];
             
-            // Handle upload surat dokter (cuti sakit)
             if ($request->hasFile('medical_certificate')) {
                 $data['medical_certificate'] = $this->uploadFile(
                     $request->file('medical_certificate'),
@@ -92,15 +91,12 @@ class LeaveRequestController extends BaseController
                 );
             }
             
-            // Create leave request
             $leaveRequest = LeaveRequest::create($data);
             
-            // Kurangi kuota jika cuti tahunan
             if ($request->leave_type === 'annual') {
                 $this->quotaService->deduct($user, $totalDays);
             }
             
-            // Generate surat permohonan (untuk cuti tahunan)
             if ($request->leave_type === 'annual') {
                 $requestLetterPath = $this->pdfService->generateRequestLetter($leaveRequest);
                 $leaveRequest->update(['request_letter_pdf' => $requestLetterPath]);
@@ -111,23 +107,16 @@ class LeaveRequestController extends BaseController
         'Pengajuan cuti berhasil! Menunggu approval HRD.',
         'Gagal mengajukan cuti');
     }
-    
-    /**
-     * Display the specified leave request
-     */
+
     public function show(LeaveRequest $leaveRequest)
     {
-        // Validasi ownership
         $this->validateOwnership($leaveRequest);
         
         $leaveRequest->load(['approvals.approver', 'user.division']);
         
         return view('leader.leave-requests.show', compact('leaveRequest'));
     }
-    
-    /**
-     * Cancel leave request (same as employee)
-     */
+
     public function cancel(Request $request, LeaveRequest $leaveRequest)
     {
         $this->validateOwnership($leaveRequest);
@@ -157,5 +146,35 @@ class LeaveRequestController extends BaseController
         },
         'Pengajuan cuti berhasil dibatalkan.',
         'Gagal membatalkan pengajuan cuti');
+    }
+
+    public function downloadRequest(LeaveRequest $leaveRequest)
+    {
+        $this->validateOwnership($leaveRequest);
+        
+        if (!$leaveRequest->request_letter_pdf || !\Illuminate\Support\Facades\Storage::disk('public')->exists($leaveRequest->request_letter_pdf)) {
+            return $this->error('Surat permohonan tidak ditemukan.');
+        }
+        
+        $fileName = 'Surat_Permohonan_' . str_replace(' ', '', $leaveRequest->user->full_name) . '_' . $leaveRequest->start_date->format('Y-m-d') . '.pdf';
+        
+        return \Storage::disk('public')->download($leaveRequest->request_letter_pdf, $fileName);
+    }
+
+    public function downloadApproval(LeaveRequest $leaveRequest)
+    {
+        $this->validateOwnership($leaveRequest);
+        
+        if ($leaveRequest->status !== 'approved') {
+            return $this->error('Surat izin hanya tersedia untuk cuti yang sudah disetujui.');
+        }
+        
+        if (!$leaveRequest->approval_letter_pdf || !\Illuminate\Support\Facades\Storage::disk('public')->exists($leaveRequest->approval_letter_pdf)) {
+            return $this->error('Surat izin tidak ditemukan.');
+        }
+        
+        $fileName = 'Surat_Izin_Cuti_' . str_replace(' ', '', $leaveRequest->user->full_name) . '_' . $leaveRequest->start_date->format('Y-m-d') . '.pdf';
+        
+        return \Storage::disk('public')->download($leaveRequest->approval_letter_pdf, $fileName);
     }
 }

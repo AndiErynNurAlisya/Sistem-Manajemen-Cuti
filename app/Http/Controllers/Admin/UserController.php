@@ -20,27 +20,43 @@ class UserController extends BaseController
     
     /**
      * Display a listing of users
+     * 
      */
     public function index(Request $request)
     {
         $query = User::with('division');
         
-        // Filter by role
         if ($request->filled('role')) {
             $query->where('role', $request->role);
         }
         
-        // Filter by division
         if ($request->filled('division_id')) {
             $query->where('division_id', $request->division_id);
         }
         
-        // Filter by status
         if ($request->filled('is_active')) {
             $query->where('is_active', $request->is_active);
         }
         
-        // Search
+        if ($request->filled('tenure')) {
+            $now = now();
+            
+            switch ($request->tenure) {
+                case 'less_6':
+                    $query->where('join_date', '>=', $now->copy()->subMonths(6));
+                    break;
+                case '6_12':
+                    $query->whereBetween('join_date', [
+                        $now->copy()->subMonths(12),
+                        $now->copy()->subMonths(6)
+                    ]);
+                    break;
+                case 'more_12':
+                    $query->where('join_date', '<', $now->copy()->subMonths(12));
+                    break;
+            }
+        }
+        
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
@@ -50,10 +66,22 @@ class UserController extends BaseController
             });
         }
         
-        // Sort
         $sortBy = $request->get('sort_by', 'created_at');
         $sortOrder = $request->get('sort_order', 'desc');
-        $query->orderBy($sortBy, $sortOrder);
+        
+        $allowedSortColumns = ['full_name', 'join_date', 'created_at'];
+        
+        if (in_array($sortBy, $allowedSortColumns)) {
+            $query->orderBy($sortBy, $sortOrder);
+        } 
+        elseif ($sortBy === 'division') {
+            $query->leftJoin('divisions', 'users.division_id', '=', 'divisions.id')
+                  ->select('users.*')
+                  ->orderBy('divisions.name', $sortOrder);
+        }
+        else {
+            $query->orderBy('created_at', 'desc');
+        }
         
         $users = $this->paginate($query);
         $divisions = Division::all();
@@ -81,34 +109,28 @@ class UserController extends BaseController
     {
         return $this->transaction(function() use ($request) {
             $data = $request->validated();
-            
-            // Hash password
+
             if (isset($data['password'])) {
                 $data['password'] = bcrypt($data['password']);
             }
-            
-            // Handle profile photo upload
+
             if ($request->hasFile('profile_photo')) {
                 $data['profile_photo'] = $this->uploadFile(
                     $request->file('profile_photo'),
                     'profile_photos'
                 );
             }
-            
-            // Create user
+
             $user = User::create($data);
-            
-            // 🔥 AUTO-SET LEADER: Jika role = leader dan punya divisi
+
             if ($user->role->value === 'leader' && $user->division_id) {
                 $division = Division::find($user->division_id);
                 
-                // Set sebagai leader jika divisi belum punya leader
                 if ($division && !$division->leader_id) {
                     $division->update(['leader_id' => $user->id]);
                 }
             }
-            
-            // Initialize kuota jika employee atau leader
+
             if (in_array($user->role->value, ['employee', 'leader'])) {
                 $this->quotaService->initialize($user);
             }
@@ -136,10 +158,8 @@ class UserController extends BaseController
     {
         $divisions = Division::all();
 
-        // Cek apakah sudah ada admin lain
         $adminExists = User::where('role', 'admin')->exists();
 
-        // Cek apakah sudah ada HRD lain
         $hrdExists = User::where('role', 'hrd')->exists();
 
         return view('admin.users.edit', compact(
@@ -157,21 +177,17 @@ class UserController extends BaseController
     {
         return $this->transaction(function() use ($request, $user) {
             $data = $request->validated();
-            
-            // Simpan data lama untuk tracking perubahan
+
             $oldDivisionId = $user->division_id;
             $oldRole = $user->role->value;
             
-            // Hash password jika diisi
             if (!empty($data['password'])) {
                 $data['password'] = bcrypt($data['password']);
             } else {
                 unset($data['password']);
             }
             
-            // Handle profile photo upload
             if ($request->hasFile('profile_photo')) {
-                // Delete old photo
                 if ($user->profile_photo) {
                     $this->deleteFile($user->profile_photo);
                 }
@@ -182,10 +198,8 @@ class UserController extends BaseController
                 );
             }
             
-            // Update user
             $user->update($data);
             
-            // 🔥 HANDLE LEADER SYNC LOGIC
             
             // 1. Jika berubah jadi leader DAN punya divisi
             if ($user->role->value === 'leader' && $user->division_id) {
@@ -199,7 +213,6 @@ class UserController extends BaseController
             
             // 2. Jika dulu leader tapi sekarang role berubah
             if ($oldRole === 'leader' && $user->role->value !== 'leader') {
-                // Hapus dari leader_id divisi
                 Division::where('leader_id', $user->id)
                     ->update(['leader_id' => null]);
             }
@@ -230,24 +243,20 @@ class UserController extends BaseController
      */
     public function destroy(User $user)
     {
-        // Tidak bisa hapus diri sendiri
         if ($user->id === $this->user()->id) {
             return $this->error('Anda tidak bisa menghapus akun sendiri!');
         }
         
-        // Tidak bisa hapus jika punya pending leave
         if ($user->leaveRequests()->where('status', 'pending')->exists()) {
             return $this->error('User tidak bisa dihapus karena masih ada pengajuan cuti pending.');
         }
         
         return $this->transaction(function() use ($user) {
-            // 🔥 Hapus dari leader_id jika dia adalah leader
             if ($user->role->value === 'leader') {
                 Division::where('leader_id', $user->id)
                     ->update(['leader_id' => null]);
             }
             
-            // Delete profile photo
             if ($user->profile_photo) {
                 $this->deleteFile($user->profile_photo);
             }

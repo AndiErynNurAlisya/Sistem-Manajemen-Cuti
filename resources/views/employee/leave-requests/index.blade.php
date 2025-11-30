@@ -1,92 +1,12 @@
-{{-- resources/views/employee/leave-requests/index.blade.php --}}
 <x-app-layout>
-    <x-slot name="title">My Leave Requests</x-slot>
+    <x-slot name="pageTitle">My Leave Requests</x-slot>
+    <x-slot name="pageDescription">Kelola dan pantau pengajuan cuti Anda</x-slot>
 
-    {{-- Page Header --}}
-    <div class="mb-6 flex items-center justify-between">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-900">My Leave Requests</h1>
-            <p class="text-sm text-gray-600 mt-1">Kelola dan pantau pengajuan cuti Anda</p>
-        </div>
-        <a href="{{ route('employee.leave-requests.create') }}" 
-           class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg shadow-sm transition">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-            </svg>
-            Ajukan Cuti Baru
-        </a>
-    </div>
+    <x-ui.filter-card 
+        :action="route('employee.leave-requests.index')"
+        type="leave-request"
+    />
 
-    {{-- Filter Card --}}
-    <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-        <form method="GET" action="{{ route('employee.leave-requests.index') }}" class="space-y-4">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                {{-- Status Filter --}}
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                    <select name="status" 
-                            class="block w-full shadow-sm sm:text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
-                        <option value="">Semua Status</option>
-                        <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Menunggu Persetujuan</option>
-                        <option value="approved_by_leader" {{ request('status') == 'approved_by_leader' ? 'selected' : '' }}>Disetujui Ketua Divisi</option>
-                        <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Disetujui</option>
-                        <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Ditolak</option>
-                        <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Dibatalkan</option>
-                    </select>
-                </div>
-
-                {{-- Leave Type Filter --}}
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Jenis Cuti</label>
-                    <select name="leave_type" 
-                            class="block w-full shadow-sm sm:text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
-                        <option value="">Semua Jenis</option>
-                        <option value="annual" {{ request('leave_type') == 'annual' ? 'selected' : '' }}>Cuti Tahunan</option>
-                        <option value="sick" {{ request('leave_type') == 'sick' ? 'selected' : '' }}>Cuti Sakit</option>
-                    </select>
-                </div>
-
-                {{-- Start Date Filter --}}
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Dari Tanggal</label>
-                    <input type="date" 
-                           name="start_date" 
-                           value="{{ request('start_date') }}"
-                           class="block w-full shadow-sm sm:text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
-                </div>
-
-                {{-- End Date Filter --}}
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Sampai Tanggal</label>
-                    <input type="date" 
-                           name="end_date" 
-                           value="{{ request('end_date') }}"
-                           class="block w-full shadow-sm sm:text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
-                </div>
-            </div>
-
-            <div class="flex items-center gap-3">
-                <button type="submit" 
-                        class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg shadow-sm transition">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
-                    Filter
-                </button>
-                @if(request()->hasAny(['status', 'leave_type', 'start_date', 'end_date']))
-                    <a href="{{ route('employee.leave-requests.index') }}" 
-                       class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                        Reset Filter
-                    </a>
-                @endif
-            </div>
-        </form>
-    </div>
-
-    {{-- Leave Requests Table --}}
     <div class="bg-white rounded-lg shadow-sm overflow-hidden">
         @if($leaveRequests->isEmpty())
             <x-ui.empty-state
@@ -107,74 +27,8 @@
                 </x-slot:icon>
             </x-ui.empty-state>
         @else
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead class="bg-gray-50 border-b border-gray-200">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jenis Cuti</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Periode</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Durasi Cuti</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Ajuan</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        @foreach($leaveRequests as $leave)
-                            <tr class="hover:bg-gray-50 transition">
-                                {{-- Leave Type --}}
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <x-ui.leave-type-badge :type="$leave->leave_type" />
-                                </td>
+            <x-ui.leave-requests-table :leaveRequests="$leaveRequests" />
 
-                                {{-- Period --}}
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900">
-                                        {{ $leave->start_date->format('d M Y') }}
-                                    </div>
-                                    <div class="text-xs text-gray-500">
-                                        s/d {{ $leave->end_date->format('d M Y') }}
-                                    </div>
-                                </td>
-
-                                {{-- Duration --}}
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                    <span class="font-medium">{{ $leave->total_days }}</span> hari
-                                </td>
-
-                                {{-- Request Date --}}
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                    {{ $leave->request_date->format('d M Y') }}
-                                </td>
-
-                                {{-- Status --}}
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <x-ui.leave-status-badge :status="$leave->status" />
-                                </td>
-
-                                
-
-                                {{-- Actions --}}
-                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <a href="{{ route('employee.leave-requests.show', $leave) }}" 
-                                       class="text-indigo-600 hover:text-indigo-900 mr-3">
-                                        Detail
-                                    </a>
-                                    @if($leave->canBeCancelled())
-                                        <button type="button"
-                                                onclick="openCancelModal({{ $leave->id }})"
-                                                class="text-red-600 hover:text-red-900">
-                                            Batalkan
-                                        </button>
-                                    @endif
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-
-            {{-- Pagination --}}
             @if($leaveRequests->hasPages())
                 <div class="bg-white px-6 py-4 border-t border-gray-200">
                     {{ $leaveRequests->links() }}
@@ -183,7 +37,6 @@
         @endif
     </div>
 
-    {{-- Cancel Modal --}}
     <div x-data="{ 
             showModal: false, 
             leaveId: null,

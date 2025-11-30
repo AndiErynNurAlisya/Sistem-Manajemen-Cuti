@@ -5,7 +5,7 @@
 
 @php
     // warna default divisi
-    $default = 'bg-blue-100 text-blue-800';
+    $default = 'bg-[#334124] text-white';
 
     // final warna: override > default
     $finalColor = $color ?: $default;
